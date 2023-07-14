@@ -65,22 +65,21 @@ class FMC_Fuel {
 
         fmc.onRightInput[4] = async () => {
             FMC_Fuel.ofpRequestText = "SENDING";
-
+ 
             setTimeout(async () => {
-                if (!fmc.simbrief.blockFuel) await getSimBriefPlan(fmc);
+                await getSimBriefPlan(fmc); 
 
                 if (fmc.simbrief.blockFuel) {
                     Coherent.call("PLAY_INSTRUMENT_SOUND", "uplink_chime");
-                    const desiredFuel = parseFloat(fmc.simbrief.blockFuel.toString());
-                    setDesiredFuel(fmc, updateView, SaltyUnits.userToKg(desiredFuel));
-                } else fmc.showErrorMessage("WRONG PILOT ID");
+                    let desiredFuel = parseFloat(fmc.simbrief.blockFuel.toString());
+                    if (fmc.simbrief.units == "lbs")  desiredFuel = desiredFuel / 2.204625;  
+                    setDesiredFuel(fmc, updateView, desiredFuel);
+                }
+                else {fmc.showErrorMessage("WRONG PILOT ID");}
 
                 FMC_Fuel.ofpRequestText = "SEND>";
             }, fmc.getInsertDelay())
 
-
-            const desiredFuel = parseFloat(fmc.simbrief.blockFuel.toString());
-            setDesiredFuel(fmc, updateView, SaltyUnits.userToKg(desiredFuel));
         };
 
         fmc.onLeftInput[5] = () => {
